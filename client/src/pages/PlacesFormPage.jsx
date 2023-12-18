@@ -1,36 +1,54 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import AccountNav from "../AccountNav";
 import PhotosUploader from "../PhotosUploader";
 import Perks from "../Perks";
-
+import axios from "axios";
+import { Navigate, useParams } from "react-router-dom";
 
 export default function PlacesFormPage() {
-    const [title, setTitle] = useState("");
-    const [address, setAddress] = useState("");
-    const [description, setDescription] = useState("");
-    const [perks, setPerks] = useState([]);
-    const [addedPhotos, setAddedPhotos] = useState([]);
-    const [extraInfo, setExtraInfo] = useState("");
-    const [chekIn, setChekIn] = useState("");
-    const [chekOut, setChekOut] = useState("");
-    const [maxGuests, setMaxGuests] = useState(1);
+  const { id } = useParams();
+  const [title, setTitle] = useState("");
+  const [address, setAddress] = useState("");
+  const [description, setDescription] = useState("");
+  const [perks, setPerks] = useState([]);
+  const [addedPhotos, setAddedPhotos] = useState([]);
+  const [extraInfo, setExtraInfo] = useState("");
+  const [checkIn, setCheckIn] = useState("");
+  const [checkOut, setCheckOut] = useState("");
+  const [maxGuests, setMaxGuests] = useState(1);
+  const [redirect, setRedirect] = useState(false);
 
-    // const handleChange = (name) => (value) => {
-    //     setFormData((prev) => ({
-    //         ...prev,
-    //         [name]: value,
-    //       })
-    //       );
-    //   };
-  
-    // const [formData, setFormData] = useState({});
-
-    const [redirectToPlacesList, setRedirectToPlacesList] = useState(false);
-
-    if (redirectToPlacesList && !action) {
-      return <Navigate to={"/account/places"} />;
+  useEffect(() => {
+    if (!id) {
+      return;
     }
+    axios.get("/places/" + id).then((response) => {
+      const { data } = response;
+      setTitle(data.title)
+      setAddress(data.address)
+      setAddedPhotos(data.photos)
+      setDescription(data.description)
+      setPerks(data.perks)
+      setExtraInfo(data.extraInfo)
+      setCheckIn(data.checkIn)
+      setCheckOut(data.checkOut)
+      setMaxGuests(data.maxGuests)
+    });
+  }, [id]);
 
+  // const handleChange = (name) => (value) => {
+  //     setFormData((prev) => ({
+  //         ...prev,
+  //         [name]: value,
+  //       })
+  //       );
+  //   };
+
+  // const [formData, setFormData] = useState({});
+
+  if (redirect) {
+    return <Navigate to={"/account/places"} />;
+  }
 
   async function addNewPlace(e) {
     e.preventDefault();
@@ -41,11 +59,11 @@ export default function PlacesFormPage() {
       description,
       perks,
       extraInfo,
-      chekIn,
-      chekOut,
+      checkIn,
+      checkOut,
       maxGuests,
     });
-    setRedirectToPlacesList(true);
+    setRedirect(true);
   }
 
   function inputHeader(text) {
@@ -65,10 +83,9 @@ export default function PlacesFormPage() {
     );
   }
 
-
   return (
     <div>
-        <AccountNav />
+      <AccountNav />
       <form onSubmit={addNewPlace}>
         {preInput(
           "Título",
